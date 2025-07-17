@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  name       String
+  email      String    @unique
+  passwordHash String
+  kycStatus  String    @default("Pending")
+  createdAt  DateTime  @default(now())
+  accounts   Account[]
+}
+
+model Account {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  accountType  String
+  balance      Decimal    @default(0.00)
+  createdAt    DateTime   @default(now())
+  status       String     @default("Active")
+  transactions          LedgerTransaction[] @relation("PrimaryTransactions")
+  counterpartyTransactions LedgerTransaction[] @relation("Counterparty")
+}
+
+model LedgerTransaction {
+  id                     String      @id @default(uuid())
+  accountId              String
+  account                Account     @relation("PrimaryTransactions", fields: [accountId], references: [id])
+  transactionType        String
+  amount                 Decimal
+  counterpartyAccountId  String?     @map("counterparty_account_id")
+  counterpartyAccount    Account?    @relation("Counterparty", fields: [counterpartyAccountId], references: [id])
+  timestamp              DateTime    @default(now())
+  description            String?
+  status                 String      @default("Pending")
+  hash                   String
+}
