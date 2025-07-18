@@ -13,6 +13,7 @@
     "@types/uuid": "^10.0.0",
     "bcrypt": "^6.0.0",
     "cookie": "^1.0.2",
+    "jose": "^6.0.12",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.2",
     "next": "15.4.1",
