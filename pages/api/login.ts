@@ -5,7 +5,10 @@ import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback2orld@123';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not defined in .env');
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -24,7 +27,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET as string, { 
+      expiresIn: '1h' 
+    });
     const serializedCookie = serialize('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
